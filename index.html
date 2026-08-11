@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HesabuPro — Invoice & Receipt Generator</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><span class="logo-mark">H</span> HesabuPro</div>
+  <div class="tier-area">
+    <span id="tierBadge" class="tier-badge free">FREE</span>
+    <button id="unlockBtn" class="btn btn-gold btn-sm" onclick="openUnlock()">Unlock $2</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="form-col">
+
+    <div class="card">
+      <h3>Your Business</h3>
+      <div class="grid-2">
+        <input id="biz_name" class="input" placeholder="Business name *">
+        <input id="biz_tin" class="input" placeholder="TIN">
+        <input id="biz_phone" class="input" placeholder="Phone">
+        <input id="biz_email" class="input" placeholder="Email">
+      </div>
+      <input id="biz_addr" class="input" placeholder="Address / P.O. Box">
+    </div>
+
+    <div class="card">
+      <h3>Bill To</h3>
+      <div class="grid-2">
+        <input id="cli_name" class="input" placeholder="Client name *">
+        <input id="cli_phone" class="input" placeholder="Client phone">
+      </div>
+      <input id="cli_addr" class="input" placeholder="Client address">
+    </div>
+
+    <div class="card">
+      <h3>Document</h3>
+      <div class="grid-3">
+        <select id="mode" class="input">
+          <option value="invoice">Invoice</option>
+          <option value="receipt">Receipt (PAID)</option>
+        </select>
+        <input id="inv_no" class="input" placeholder="No.">
+        <input id="vat" class="input" type="number" min="0" value="0" placeholder="VAT %">
+        <input id="inv_date" class="input" type="date">
+        <input id="inv_due" class="input" type="date">
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Items</h3>
+      <table class="items-table">
+        <thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th></th></tr></thead>
+        <tbody id="itemsBody"></tbody>
+      </table>
+      <button class="btn btn-ghost btn-sm" id="addItemBtn">+ Add item</button>
+      <textarea id="notes" class="input" rows="2" placeholder="Notes (payment instructions, thank you...)"></textarea>
+    </div>
+
+    <div class="card">
+      <h3>Branding <span class="lock-note">(Premium)</span></h3>
+      <div class="grid-2">
+        <label class="color-field">Accent
+          <input id="colorInput" type="color" value="#0B3457" disabled>
+        </label>
+        <label class="file-field">Logo
+          <input id="logoInput" type="file" accept="image/*" disabled>
+        </label>
+      </div>
+    </div>
+
+  </section>
+
+  <section class="preview-col">
+    <div id="preview" class="paper"></div>
+    <div class="actions">
+      <button id="downloadBtn" class="btn btn-primary">Download PDF</button>
+      <span id="usageNote" class="usage-note"></span>
+    </div>
+  </section>
+</main>
+
+<div id="unlockModal" class="modal" hidden>
+  <div class="modal-card">
+    <button class="modal-x" onclick="closeUnlock()">×</button>
+    <h3>Unlock Premium — <span id="priceTag"></span></h3>
+    <ol class="steps">
+      <li>Send <b id="priceTag2"></b> via <b>M-Pesa</b> to <b id="mpesaNo"></b></li>
+      <li>Type the M-Pesa transaction ref below</li>
+      <li>Tap the WhatsApp button — we reply with your unlock code</li>
+    </ol>
+    <input id="mpesaRef" class="input" placeholder="M-Pesa ref e.g. QEW1234ABX">
+    <a id="waLink" class="btn btn-primary btn-block" target="_blank" rel="noopener">I have paid — send my code</a>
+    <div class="or">…then paste your code here…</div>
+    <input id="codeInput" class="input" placeholder="HSP-XXXX-XXXX">
+    <button class="btn btn-gold btn-block" onclick="tryUnlock()">Unlock Premium</button>
+    <p id="unlockMsg" class="msg"></p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
