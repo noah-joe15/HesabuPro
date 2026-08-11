@@ -113,6 +113,28 @@ function renderPreview(){
 }
 function refresh(){renderPreview();}
 
+// ============ RESET AFTER DOWNLOAD ============
+function resetForm(){
+  // clear business + client + notes
+  ['biz_name','biz_tin','biz_phone','biz_email','biz_addr',
+   'cli_name','cli_phone','cli_addr','notes'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('vat').value='0';
+  // fresh document meta
+  document.getElementById('inv_no').value='INV-'+Date.now().toString().slice(-6);
+  var today=new Date();
+  document.getElementById('inv_date').value=today.toISOString().split('T')[0];
+  var due=new Date(Date.now()+7*86400000);
+  document.getElementById('inv_due').value=due.toISOString().split('T')[0];
+  // one empty item row
+  document.getElementById('itemsBody').innerHTML='';
+  addItemRow();
+  // forget saved business info so even a reload starts fresh
+  localStorage.removeItem('hsp_business');
+  refresh();
+}
+
 // ============ PDF ============
 function downloadPDF(){
   const u=usage();
@@ -172,9 +194,10 @@ function downloadPDF(){
     doc.setFontSize(8.5);doc.setTextColor(150);
     doc.text('Free plan — remove watermark at '+CONFIG.site,W/2,290,{align:'center'});
   }
-  doc.save((v('inv_no')||'invoice')+'.pdf');
+    doc.save((v('inv_no')||'invoice')+'.pdf');
   if(!state.premium){u.count++;localStorage.setItem('hsp_usage',JSON.stringify(u));}
   updateUsageNote();
+  resetForm();   // start clean for the next customer
 }
 
 // ============ UNLOCK ============
