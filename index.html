@@ -37,6 +37,7 @@
         <input id="cli_phone" class="input" placeholder="Client phone">
       </div>
       <input id="cli_addr" class="input" placeholder="Client address">
+      <input id="cli_email" class="input" placeholder="Client email">
     </div>
 
     <div class="card">
@@ -45,22 +46,61 @@
         <select id="mode" class="input">
           <option value="invoice">Invoice</option>
           <option value="receipt">Receipt (PAID)</option>
+          <option value="quote">Quote</option>
+          <option value="estimate">Estimate</option>
+        </select>
+        <select id="currency" class="input">
+          <option value="TZS">TZS</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="KES">KES</option>
         </select>
         <input id="inv_no" class="input" placeholder="No.">
-        <input id="vat" class="input" type="number" min="0" value="0" placeholder="VAT %">
+      </div>
+      <div class="grid-3">
         <input id="inv_date" class="input" type="date">
         <input id="inv_due" class="input" type="date">
+        <select id="vat" class="input">
+          <option value="0">VAT 0%</option>
+          <option value="18">VAT 18%</option>
+          <option value="20">VAT 20%</option>
+        </select>
       </div>
     </div>
 
     <div class="card">
       <h3>Items</h3>
       <table class="items-table">
-        <thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th></th></tr></thead>
+        <thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Disc%</th><th></th></tr></thead>
         <tbody id="itemsBody"></tbody>
       </table>
       <button class="btn btn-ghost btn-sm" id="addItemBtn">+ Add item</button>
       <textarea id="notes" class="input" rows="2" placeholder="Notes (payment instructions, thank you...)"></textarea>
+    </div>
+
+    <div class="card">
+      <h3>Payment Terms <span class="lock-note">(Premium)</span></h3>
+      <select id="terms" class="input" disabled>
+        <option value="">Select preset...</option>
+        <option value="Due on receipt">Due on receipt</option>
+        <option value="Net 7">Net 7 days</option>
+        <option value="Net 15">Net 15 days</option>
+        <option value="Net 30">Net 30 days</option>
+        <option value="Net 60">Net 60 days</option>
+      </select>
+      <textarea id="terms_text" class="input" rows="2" placeholder="Custom payment terms (e.g., 50% upfront, balance on delivery)" disabled></textarea>
+    </div>
+
+    <div class="card">
+      <h3>Bank Details <span class="lock-note">(Premium)</span></h3>
+      <div class="grid-2">
+        <input id="bank_name" class="input" placeholder="Bank name" disabled>
+        <input id="bank_account" class="input" placeholder="Account number" disabled>
+      </div>
+      <div class="grid-2">
+        <input id="bank_swift" class="input" placeholder="SWIFT/BIC" disabled>
+        <input id="bank_branch" class="input" placeholder="Branch" disabled>
+      </div>
     </div>
 
     <div class="card">
@@ -73,6 +113,38 @@
           <input id="logoInput" type="file" accept="image/*" disabled>
         </label>
       </div>
+    </div>
+
+    <div class="card">
+      <h3>Custom Header & Footer <span class="lock-note">(Premium)</span></h3>
+      <textarea id="custom_header" class="input" rows="2" placeholder="Custom header text (appears at top of invoice)" disabled></textarea>
+      <textarea id="custom_footer" class="input" rows="2" placeholder="Custom footer text (appears at bottom)" disabled></textarea>
+    </div>
+
+    <div class="card">
+      <h3>Signature <span class="lock-note">(Premium)</span></h3>
+      <div class="grid-2">
+        <input id="sig_name" class="input" placeholder="Signatory name" disabled>
+        <input id="sig_title" class="input" placeholder="Title (e.g., Manager)" disabled>
+      </div>
+      <label class="file-field">Signature image
+        <input id="sigImage" type="file" accept="image/*" disabled>
+      </label>
+    </div>
+
+    <div class="card premium-cta">
+      <h3>🚀 Go Premium</h3>
+      <p style="margin:0 0 12px; color:var(--soft); font-size:14px;">Unlock all features for just <b>$2</b> (one-time):</p>
+      <ul style="margin:0 0 12px; padding-left:18px; font-size:13px; color:var(--soft);">
+        <li>Custom colors & logo</li>
+        <li>Custom headers & footers</li>
+        <li>Payment terms presets</li>
+        <li>Bank details section</li>
+        <li>Signature area</li>
+        <li>No watermark</li>
+        <li>Unlimited invoices</li>
+      </ul>
+      <button class="btn btn-primary btn-block" onclick="openUnlock()">Unlock Premium — $2</button>
     </div>
 
   </section>
@@ -90,6 +162,7 @@
   <div class="modal-card">
     <button class="modal-x" onclick="closeUnlock()">×</button>
     <h3>Unlock Premium — <span id="priceTag"></span></h3>
+    <p style="color:var(--soft); font-size:13px; margin:0 0 12px;">Get unlimited invoices, custom branding, payment terms, bank details, signatures, and no watermark.</p>
     <ol class="steps">
       <li>Send <b id="priceTag2"></b> via <b>M-Pesa</b> to <b id="mpesaNo"></b></li>
       <li>Type the M-Pesa transaction ref below</li>
