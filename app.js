@@ -108,10 +108,30 @@ function renderPreview(){
   '<tr class="p-total-row" style="background:'+c+'"><td>TOTAL</td><td style="text-align:right">'+fmt(tot)+'</td></tr>'+
   '</table></div>'+
   (v('notes')?'<p class="p-notes">'+esc(v('notes'))+'</p>':'')+
-  (state.mode==='receipt'?'<div class="p-paid">PAID</div>':'')+
+    (state.mode==='receipt'?'<img src="paid-stamp.png" alt="PAID" style="position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);width:min(150px,40%);opacity:.92;pointer-events:none;">':'')+
   (!state.premium?'<div class="p-watermark">HesabuPro</div><div class="p-freefoot">Free plan — remove watermark: '+CONFIG.site+'</div>':'');
 }
 function refresh(){renderPreview();}
+
+// ============ PAID STAMP IMAGE ============
+var _stampCache = null;
+function getPaidStamp(cb){
+  if (_stampCache) return cb(_stampCache);
+  var img = document.getElementById('paidStampImg');
+  if (!img) return cb(null);
+  function done(){
+    try{
+      var cnv = document.createElement('canvas');
+      cnv.width = img.naturalWidth || 500;
+      cnv.height = img.naturalHeight || 500;
+      cnv.getContext('2d').drawImage(img, 0, 0);
+      _stampCache = cnv.toDataURL('image/png');
+      cb(_stampCache);
+    }catch(e){ cb(null); }
+  }
+  if (img.complete && img.naturalWidth) done();
+  else { img.onload = done; img.onerror = function(){ cb(null); }; }
+}
 
 // ============ RESET AFTER DOWNLOAD ============
 function resetForm(){
@@ -154,39 +174,16 @@ function downloadPDF(){
   doc.setFontSize(9);doc.setFont('helvetica','normal');
   doc.text('# '+v('inv_no'),W-M,20,{align:'right'});
   doc.text('Date: '+v('inv_date'),W-M,25,{align:'right'});
-  if(state.mode!=='receipt')doc.text('Due: '+v('inv_due'),W-M,30,{align:'right'});
-  doc.setTextColor(30);doc.setFont('helvetica','bold');doc.setFontSize(9);
-  doc.text('BILL TO',M,44);
-  doc.setFont('helvetica','normal');
-  doc.text(v('cli_name')||'—',M,49);
-  doc.text([v('cli_phone'),v('cli_addr')].filter(Boolean).join('  ·  '),M,54);
-  const items=readItems();
-  doc.autoTable({
-    startY:60,
-    head:[['#','Description','Qty','Unit Price','Amount']],
-    body:items.map((it,i)=>[i+1,it.desc,it.qty,fmt(it.price),fmt(it.qty*it.price)]),
-    theme:'striped',
-    headStyles:{fillColor:[c.r,c.g,c.b]},
-    styles:{fontSize:9,cellPadding:2.5},
-    columnStyles:{0:{cellWidth:8},2:{hAlign:'right',cellWidth:14},3:{hAlign:'right',cellWidth:30},4:{hAlign:'right',cellWidth:32}},
-    margin:{left:M,right:M}
-  });
-  let y=doc.lastAutoTable.finalY+8;
-  const sub=subtotal(),vatAmt=sub*(parseFloat(v('vat'))||0)/100,tot=sub+vatAmt;
-  doc.setFontSize(9);doc.setTextColor(60);
-  doc.text('Subtotal',W-M-40,y);doc.text(fmt(sub),W-M,y,{align:'right'});y+=5;
-  doc.text('VAT',W-M-40,y);doc.text(fmt(vatAmt),W-M,y,{align:'right'});y+=6;
-  doc.setFillColor(c.r,c.g,c.b);doc.rect(W-M-46,y-4,46,8,'F');
-  doc.setTextColor(255);doc.setFont('helvetica','bold');
-  doc.text('TOTAL',W-M-42,y+1.5);doc.text(fmt(tot),W-M-2,y+1.5,{align:'right'});
-  y+=10;
-  if(v('notes')){doc.setTextColor(90);doc.setFont('helvetica','normal');doc.setFontSize(8.5);
-    doc.text(doc.splitTextToSize(v('notes'),W-2*M),M,y);}
-  if(state.mode==='receipt'){
-    doc.setDrawColor(20,80,126);doc.setTextColor(20,80,126);doc.setLineWidth(1.2);
-    doc.roundedRect(W/2-25,118,50,16,3,3);
-    doc.setFont('helvetica','bold');doc.setFontSize(18);
-    doc.text('PAID',W/2,128.5,{align:'center'});
+   if(state.mode==='receipt'){
+    if(_stampCache){
+      // real red PAID stamp image (already tilted in the artwork)
+      doc.addImage(_stampCache,'PNG', W/2-27, 108, 54, 54, undefined,'FAST');
+    } else {
+      doc.setDrawColor(20,80,126);doc.setTextColor(20,80,126);doc.setLineWidth(1.2);
+      doc.roundedRect(W/2-25,118,50,16,3,3);
+      doc.setFont('helvetica','bold');doc.setFontSize(18);
+      doc.text('PAID',W/2,128.5,{align:'center'});
+    }
   }
   if(!state.premium){
     doc.setTextColor(228);doc.setFont('helvetica','bold');doc.setFontSize(34);
@@ -270,9 +267,5 @@ function init(){
     document.getElementById('waLink').href=
       'https://wa.me/'+CONFIG.whatsapp+'?text='+encodeURIComponent('Hello, I paid '+CONFIG.price+' for HesabuPro Premium. M-Pesa ref: '+ref);
   });
+    getPaidStamp(function(){});  // warm the cache so the PDF is instant
   addItemRow();
-  applyTier();
-  updateUsageNote();
-  renderPreview();
-}
-init();
